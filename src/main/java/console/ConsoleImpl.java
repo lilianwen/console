@@ -1,7 +1,7 @@
 package console;
 
 import static console.common.ContractClassFactory.getContractClass;
-
+import java.io.FileNotFoundException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -227,6 +227,91 @@ public class ConsoleImpl implements ConsoleFace {
         System.out.println();
     }
 
+//    private void recordAssetAddr(String address) throws FileNotFoundException, IOException {
+//        Properties prop = new Properties();
+//        prop.setProperty("address", address);
+//        final Resource contractResource = new ClassPathResource("conf/contract.properties");
+//        FileOutputStream fileOutputStream = new FileOutputStream(contractResource.getFile());
+//        prop.store(fileOutputStream, "contract address");
+//        System.out.println("restore contract address:"+address);
+//    }
+
+    private void recordContractNameAndAddr(String name,String address) throws FileNotFoundException, IOException {
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            // read private key from privateKey.properties
+            Properties prop = new Properties();
+            Resource addressResource = new ClassPathResource("contract.properties");
+            if (!addressResource.exists()) {
+                File privateKeyDir = new File("conf/contract.properties");
+                privateKeyDir.createNewFile();
+                addressResource = new ClassPathResource("contract.properties");
+            }
+            // save contract address in contract.properties
+            prop.setProperty("name", name);
+            prop.setProperty("address", address);
+            os = new FileOutputStream(addressResource.getFile());
+            prop.store(os, "contract address");
+            os.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            close();
+        }
+    }
+
+    private String loadContractName() throws Exception {
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            // read contract name from contract.properties
+            Properties prop = new Properties();
+            Resource addressResource = new ClassPathResource("contract.properties");
+            if (!addressResource.exists()) {
+                System.out.println("there is no file [conf/contract.properties]");
+                return "no file conf/contract.properties";
+            }
+            is = addressResource.getInputStream();
+            prop.load(is);
+            String name = prop.getProperty("name");
+            if (name == null){
+                name = "no name property";
+            }
+            is.close();
+            return name;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            close();
+        }
+        return "Invalid contract name";
+    }
+
+    private String loadContractAddr() throws Exception {
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            // read contract address from contract.properties
+            Properties prop = new Properties();
+            Resource addressResource = new ClassPathResource("contract.properties");
+            if (!addressResource.exists()) {
+                System.out.println("there is no file [conf/contract.properties]");
+                return "no file conf/contract.properties";
+            }
+            is = addressResource.getInputStream();
+            prop.load(is);
+            String address = prop.getProperty("address");
+            if (address == null){
+                address = "no address property";
+            }
+            is.close();
+            return address;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            close();
+        }
+        return "Invalid contract address";
+    }
+
     private void handleDeployParameters(String[] params, int num) throws IllegalAccessException, InvocationTargetException, ConsoleMessageException {
             Method method = ContractClassFactory.getDeployFunction(contractClass);
             Type[] classType = method.getParameterTypes();
@@ -404,7 +489,7 @@ public class ConsoleImpl implements ConsoleFace {
 
 
     @Override
-    public void deploy(String[] params) throws Exception {
+    public void deploy(String[] params) throws FileNotFoundException,Exception {
         if (params.length < 2) {
             HelpInfo.promptHelp("deploy");
             return;
@@ -446,11 +531,12 @@ public class ConsoleImpl implements ConsoleFace {
 				}
         try {
         	Contract contract = (Contract) remoteCall.send();
-      	  contractAddress = contract.getContractAddress();
-          System.out.println(contractAddress);
-          System.out.println();
-          contractAddress = contract.getContractAddress();
-          writeLog();
+      	    contractAddress = contract.getContractAddress();
+            System.out.println(contractAddress);
+            System.out.println();
+            contractAddress = contract.getContractAddress();
+            writeLog();
+            recordContractNameAndAddr(name, contractAddress);
         } catch (Exception e) {
             if (e.getMessage().contains("0x19")) {
                 ConsoleUtils.printJson(PrecompiledCommon.transferToJson(PrecompiledCommon.PermissionDenied));
@@ -462,7 +548,8 @@ public class ConsoleImpl implements ConsoleFace {
     }
 
     @Override
-    public void call(String[] params) throws Exception {
+    public void call(String[] params) throws IOException {
+        final int methodParamLenMin = 2;
         if (params.length < 2) {
             HelpInfo.promptHelp("call");
             return;
@@ -471,14 +558,18 @@ public class ConsoleImpl implements ConsoleFace {
             HelpInfo.callHelp();
             return;
         }
-        if (params.length < 4) {
+        if (params.length < methodParamLenMin) {
             HelpInfo.promptHelp("call");
             return;
         }
-        String name = params[1];
-        if (name.endsWith(".sol")) {
-            name = name.substring(0, name.length() - 4);
+        String name = null;
+        try{
+            name = loadContractName();
+        }catch(Exception e) {
+            System.out.println("load contract name error.");
+            return ;
         }
+        
         contractName = ConsoleUtils.PACKAGENAME + "." + name;
         try {
             contractClass = getContractClass(contractName);
@@ -491,7 +582,9 @@ public class ConsoleImpl implements ConsoleFace {
             System.out.println();
             return;
         }
-        Method load =
+
+        try{
+            Method load =
                 contractClass.getMethod(
                         "load",
                         String.class,
@@ -499,48 +592,53 @@ public class ConsoleImpl implements ConsoleFace {
                         Credentials.class,
                         BigInteger.class,
                         BigInteger.class);
-        Object contractObject;
+            Object contractObject;
+            contractAddress = loadContractAddr();
+            System.out.println("contract address is "+contractAddress);
+            Address convertAddr = ConsoleUtils.convertAddress(contractAddress);
+            if (!convertAddr.isValid()) {
+                System.out.println("invalid contract address is "+contractAddress);
+                return;
+            }
+            contractAddress = convertAddr.getAddress();
+            contractObject = load.invoke(null, contractAddress, web3j, credentials, gasPrice, gasLimit);
 
-        contractAddress = params[2];
-        Address convertAddr = ConsoleUtils.convertAddress(contractAddress);
-        if (!convertAddr.isValid()) {
-            return;
-        }
-        contractAddress = convertAddr.getAddress();
-        contractObject = load.invoke(null, contractAddress, web3j, credentials, gasPrice, gasLimit);
-        String funcName = params[3];
-        Method[] methods = contractClass.getDeclaredMethods();
-        Method method = ContractClassFactory.getMethodByName(funcName, methods);
-        if(method == null) {
-        	System.out.println("Cannot find the method. Please checkout the method name.");
-        	System.out.println();
-        	return;
-        }
-        String[] generic = new String[method.getParameterCount()];
-        Type[] classType = method.getParameterTypes();
-        for (int i = 0; i < classType.length; i++) {
-            generic[i] = method.getGenericParameterTypes()[i].getTypeName();
-        }
-        Class[] classList = new Class[classType.length];
-        for (int i = 0; i < classType.length; i++) {
-            Class clazz = (Class) classType[i];
-            classList[i] = clazz;
-        }
-        Class[] parameterType =
-                ContractClassFactory.getParameterType(contractClass, funcName, params.length - 4);
-        if (parameterType == null) {
-            HelpInfo.promptNoFunc(params[1], funcName, params.length - 4);
-            return;
-        }
-        Method func = contractClass.getMethod(funcName, parameterType);
-        String[] newParams = new String[params.length - 4];
-        System.arraycopy(params, 4, newParams, 0, params.length - 4);
-        Object[] argobj = ContractClassFactory.getPrametersObject(funcName, parameterType, newParams, generic);
-        if (argobj == null) {
-            return;
-        }
-        remoteCall = (RemoteCall<?>) func.invoke(contractObject, argobj);
-        Object result;
+            String funcName = params[1];
+            Method[] methods = contractClass.getDeclaredMethods();
+            Method method = ContractClassFactory.getMethodByName(funcName, methods);
+            if(method == null) {
+        	   System.out.println("Cannot find the method. Please checkout the method name.");
+        	   System.out.println();
+        	   return;
+            }
+            //System.out.println("find the method.");
+
+            //分析函数的参数
+            String[] generic = new String[method.getParameterCount()];
+            Type[] classType = method.getParameterTypes();
+            for (int i = 0; i < classType.length; i++) {
+                generic[i] = method.getGenericParameterTypes()[i].getTypeName();
+            }
+            Class[] classList = new Class[classType.length];
+            for (int i = 0; i < classType.length; i++) {
+                Class clazz = (Class) classType[i];
+                classList[i] = clazz;
+            }
+            Class[] parameterType =
+                ContractClassFactory.getParameterType(contractClass, funcName, params.length - methodParamLenMin);
+            if (parameterType == null) {
+                HelpInfo.promptNoFunc(name, funcName, params.length - methodParamLenMin);
+                return;
+            }
+            Method func = contractClass.getMethod(funcName, parameterType);
+            String[] newParams = new String[params.length - methodParamLenMin];
+            System.arraycopy(params, methodParamLenMin, newParams, 0, params.length - methodParamLenMin);
+            Object[] argobj = ContractClassFactory.getPrametersObject(funcName, parameterType, newParams, generic);
+            if (argobj == null) {
+                return;
+            }
+            remoteCall = (RemoteCall<?>) func.invoke(contractObject, argobj);
+            Object result;
 				result = remoteCall.send();
 				if(result instanceof TransactionReceipt)
 				{
@@ -552,13 +650,18 @@ public class ConsoleImpl implements ConsoleFace {
 						return;
 					}
 				}
-        String returnObject =
+            String returnObject =
                 ContractClassFactory.getReturnObject(contractClass, funcName, parameterType, result);
-        if (returnObject == null) {
-            HelpInfo.promptNoFunc(params[1], funcName, params.length - 4);
-            return;
+            if (returnObject == null) {
+                HelpInfo.promptNoFunc(name, funcName, params.length - methodParamLenMin);
+                return;
+            }
+            System.out.print("call contract success,transactionID:");
+            System.out.println(returnObject);
+            System.out.println();
+        }catch (Exception e) {
+            System.out.printf("operator contract address failed, error message is %s\n", e.getMessage());
+            return ;
         }
-        System.out.println(returnObject);
-        System.out.println();
     }  
 }
