@@ -81,6 +81,7 @@ public class ConsoleImpl implements ConsoleFace {
     private Class<?> contractClass;
     private RemoteCall<?> remoteCall;
     private String privateKey = "";
+    private String publicKey  = "";
     public static int groupID;
     public static final int InvalidRequest = 40009;
     
@@ -131,6 +132,8 @@ public class ConsoleImpl implements ConsoleFace {
         }
         try {
             credentials = GenCredential.create(privateKey);
+            publicKey   = credentials.getEcKeyPair().getPublicKey().toString(16);
+            publicKey   = Keys.getAddress(publicKey);
         } catch (NumberFormatException e) {
             System.out.println("Please provide private key by hex format.");
             close();
@@ -225,6 +228,26 @@ public class ConsoleImpl implements ConsoleFace {
         System.out.println(sb.toString());
         ConsoleUtils.singleLine();
         System.out.println();
+    }
+
+    @Override
+    public void address() throws Exception {
+        if (publicKey == "") {
+            if (privateKey == null) {
+                System.out.println("no private key.");
+            }
+            if (credentials == null){
+                try {
+                    credentials = GenCredential.create(privateKey);
+                    publicKey = credentials.getEcKeyPair().getPublicKey().toString(16);
+                    publicKey = Keys.getAddress(publicKey);
+                } catch (NumberFormatException e) {
+                    System.out.println("Please provide private key by hex format.");
+                    close();
+                }
+            }
+        }
+        System.out.println("address: "+publicKey);
     }
 
 //    private void recordAssetAddr(String address) throws FileNotFoundException, IOException {
@@ -422,7 +445,6 @@ public class ConsoleImpl implements ConsoleFace {
     }
 
         synchronized private void writeLog() {
-        
         BufferedReader reader = null;
         try {
             File logFile = new File("deploylog.txt");
@@ -486,7 +508,6 @@ public class ConsoleImpl implements ConsoleFace {
             return;
         }
     }
-
 
     @Override
     public void deploy(String[] params) throws FileNotFoundException,Exception {

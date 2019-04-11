@@ -39,10 +39,10 @@ public class ConsoleClient {
 
       List<Completer> completers = new ArrayList<Completer>();
       completers.add(new ArgumentCompleter(new StringsCompleter("help")));
-      completers.add(
-          new ArgumentCompleter(new StringsCompleter("deploy"), new FilesCompleter(path)));
+      completers.add(new ArgumentCompleter(new StringsCompleter("address")));
+      completers.add(new ArgumentCompleter(new StringsCompleter("deploy"), new FilesCompleter(path)));
       completers.add(new ArgumentCompleter(new StringsCompleter("call"), new FilesCompleter(path)));
-            completers.add(new ArgumentCompleter(new StringsCompleter("quit")));
+      completers.add(new ArgumentCompleter(new StringsCompleter("quit")));
       completers.add(new ArgumentCompleter(new StringsCompleter("exit")));
 
       Terminal terminal = TerminalBuilder.terminal();
@@ -80,12 +80,16 @@ public class ConsoleClient {
 	        console.close();
 	        break;
 	      }
+
+        if ("address".equals(params[0])){
+          console.address();
+          continue;
+        }
         switch (params[0]) {
           case "help":
           case "h":
             console.help(params);
             break;
-          
           case "deploy":
             console.deploy(params);
             break;
