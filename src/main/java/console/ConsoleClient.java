@@ -35,71 +35,14 @@ public class ConsoleClient {
   		console = new ConsoleImpl();
      	console.init(args);
     	console.welcome();
+      Path path = FileSystems.getDefault().getPath("solidity/contracts/", "");
 
       List<Completer> completers = new ArrayList<Completer>();
       completers.add(new ArgumentCompleter(new StringsCompleter("help")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("switch")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getBlockNumber")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getPbftView")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getSealerList")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getObserverList")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getConsensusStatus")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getSyncStatus")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getNodeVersion")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getPeers")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getNodeIDList")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getGroupPeers")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getGroupList")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getBlockByHash")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getBlockByNumber")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getBlockHashByNumber")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getTransactionByHash")));
-      completers.add(
-          new ArgumentCompleter(new StringsCompleter("getTransactionByBlockHashAndIndex")));
-      completers.add(
-          new ArgumentCompleter(new StringsCompleter("getTransactionByBlockNumberAndIndex")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getTransactionReceipt")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getPendingTransactions")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getPendingTxSize")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getCode")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getTotalTransactionCount")));
-      Path path = FileSystems.getDefault().getPath("solidity/contracts/", "");
       completers.add(
           new ArgumentCompleter(new StringsCompleter("deploy"), new FilesCompleter(path)));
       completers.add(new ArgumentCompleter(new StringsCompleter("call"), new FilesCompleter(path)));
-      completers.add(
-          new ArgumentCompleter(new StringsCompleter("deployByCNS"), new FilesCompleter(path)));
-      completers.add(
-          new ArgumentCompleter(new StringsCompleter("callByCNS"), new FilesCompleter(path)));
-      completers.add(
-          new ArgumentCompleter(new StringsCompleter("queryCNS"), new FilesCompleter(path)));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getDeployLog")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("addSealer")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("addObserver")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("removeNode")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("grantUserTableManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("revokeUserTableManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("listUserTableManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("grantDeployAndCreateManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("revokeDeployAndCreateManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("listDeployAndCreateManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("grantPermissionManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("revokePermissionManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("listPermissionManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("grantNodeManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("revokeNodeManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("listNodeManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("grantCNSManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("revokeCNSManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("listCNSManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("grantSysConfigManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("revokeSysConfigManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("listSysConfigManager")));
-      completers.add(new ArgumentCompleter(new StringsCompleter("setSystemConfigByKey"), new StringsCompleter(Common.TxCountLimit)));
-      completers.add(new ArgumentCompleter(new StringsCompleter("setSystemConfigByKey"), new StringsCompleter(Common.TxGasLimit)));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getSystemConfigByKey"), new StringsCompleter(Common.TxCountLimit)));
-      completers.add(new ArgumentCompleter(new StringsCompleter("getSystemConfigByKey"), new StringsCompleter(Common.TxGasLimit)));
-      completers.add(new ArgumentCompleter(new StringsCompleter("quit")));
+            completers.add(new ArgumentCompleter(new StringsCompleter("quit")));
       completers.add(new ArgumentCompleter(new StringsCompleter("exit")));
 
       Terminal terminal = TerminalBuilder.terminal();
@@ -142,162 +85,13 @@ public class ConsoleClient {
           case "h":
             console.help(params);
             break;
-          case "switch":
-          case "s":
-            console.switchGroupID(params);
-            break;
-          case "getBlockNumber":
-        	  console.getBlockNumber(params);
-        	  break;
-          case "getPbftView":
-            console.getPbftView(params);
-            break;
-          case "getSealerList":
-            console.getSealerList(params);
-            break;
-          case "getObserverList":
-            console.getObserverList(params);
-            break;
-          case "getConsensusStatus":
-            console.getConsensusStatus(params);
-            break;
-          case "getSyncStatus":
-            console.getSyncStatus(params);
-            break;
-          case "getNodeVersion":
-            console.getNodeVersion(params);
-            break;
-          case "getPeers":
-            console.getPeers(params);
-            break;
-          case "getNodeIDList":
-            console.getNodeIDList(params);
-            break;
-          case "getGroupPeers":
-            console.getGroupPeers(params);
-            break;
-          case "getGroupList":
-            console.getGroupList(params);
-            break;
-          case "getBlockByHash":
-            console.getBlockByHash(params);
-            break;
-          case "getBlockByNumber":
-            console.getBlockByNumber(params);
-            break;
-          case "getBlockHashByNumber":
-            console.getBlockHashByNumber(params);
-            break;
-          case "getTransactionByHash":
-            console.getTransactionByHash(params);
-            break;
-          case "getTransactionByBlockHashAndIndex":
-            console.getTransactionByBlockHashAndIndex(params);
-            break;
-          case "getTransactionByBlockNumberAndIndex":
-            console.getTransactionByBlockNumberAndIndex(params);
-            break;
-          case "getTransactionReceipt":
-            console.getTransactionReceipt(params);
-            break;
-          case "getPendingTransactions":
-            console.getPendingTransactions(params);
-            break;
-          case "getPendingTxSize":
-            console.getPendingTxSize(params);
-            break;
-          case "getCode":
-            console.getCode(params);
-            break;
-          case "getTotalTransactionCount":
-            console.getTotalTransactionCount(params);
-            break;
+          
           case "deploy":
             console.deploy(params);
             break;
-          case "getDeployLog":
-            console.getDeployLog(params);
-            break;
+            
           case "call":
             console.call(params);
-            break;
-          case "deployByCNS":
-            console.deployByCNS(params);
-            break;
-          case "callByCNS":
-            console.callByCNS(params);
-            break;
-          case "queryCNS":
-            console.queryCNS(params);
-            break;
-          case "addSealer":
-            console.addSealer(params);
-            break;
-          case "addObserver":
-            console.addObserver(params);
-            break;
-          case "removeNode":
-            console.removeNode(params);
-            break;
-          case "setSystemConfigByKey":
-            console.setSystemConfigByKey(params);
-            break;
-          case "getSystemConfigByKey":
-            console.getSystemConfigByKey(params);
-            break;
-          case "grantUserTableManager":
-            console.grantUserTableManager(params);
-            break;
-          case "revokeUserTableManager":
-            console.revokeUserTableManager(params);
-            break;
-          case "listUserTableManager":
-            console.listUserTableManager(params);
-            break;
-          case "grantDeployAndCreateManager":
-            console.grantDeployAndCreateManager(params);
-            break;
-          case "revokeDeployAndCreateManager":
-            console.revokeDeployAndCreateManager(params);
-            break;
-          case "listDeployAndCreateManager":
-            console.listDeployAndCreateManager(params);
-            break;
-          case "grantPermissionManager":
-            console.grantPermissionManager(params);
-            break;
-          case "revokePermissionManager":
-            console.revokePermissionManager(params);
-            break;
-          case "listPermissionManager":
-            console.listPermissionManager(params);
-            break;
-          case "grantNodeManager":
-            console.grantNodeManager(params);
-            break;
-          case "revokeNodeManager":
-            console.revokeNodeManager(params);
-            break;
-          case "listNodeManager":
-            console.listNodeManager(params);
-            break;
-          case "grantCNSManager":
-            console.grantCNSManager(params);
-            break;
-          case "revokeCNSManager":
-            console.revokeCNSManager(params);
-            break;
-          case "listCNSManager":
-            console.listCNSManager(params);
-            break;
-          case "grantSysConfigManager":
-            console.grantSysConfigManager(params);
-            break;
-          case "revokeSysConfigManager":
-            console.revokeSysConfigManager(params);
-            break;
-          case "listSysConfigManager":
-            console.listSysConfigManager(params);
             break;
           default:
             System.out.println("Undefined command: \"" + params[0] + "\". Try \"help\".\n");

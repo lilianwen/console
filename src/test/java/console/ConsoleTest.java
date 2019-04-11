@@ -39,7 +39,7 @@ public class ConsoleTest {
 
     assertTrue(!"".equals(log.getLog()));
   }
-
+/*
   @Test
   public void getBlockNumberTest() throws IOException {
     String[] params1 = {};
@@ -729,4 +729,5 @@ public class ConsoleTest {
     console.getNodeIDList(params3);
     assertTrue(!"".equals(log.getLog()));
   }
+  */
 }

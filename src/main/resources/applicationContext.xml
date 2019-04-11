@@ -23,7 +23,7 @@
 					<property name="groupId" value="1" />
 					<property name="connectionsStr">
 						<list>
-							<value>127.0.0.1:20200</value>
+							<value>10.168.15.121:20200</value>
 						</list>
 					</property>
 				</bean>
